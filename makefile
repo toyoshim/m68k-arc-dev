@@ -55,11 +55,11 @@ m68k-elf-gcc:
 
 runtime:
 	m68k-elf-gcc -nostdlib -c -o runtime/vectors.o runtime/vectors.S && \
-	m68k-elf-gcc -nostdlib -c -o runtime/start.o runtime/start.c && \
+	m68k-elf-gcc -O2 -nostdlib -c -o runtime/start.o runtime/start.c && \
 	mkdir -p $(PREFIX)/lib/runtime && \
 	cp runtime/*.o $(PREFIX)/lib/runtime && \
-	mkdir -p $(PREFIX)/include && \
-	cp -r include/* $(PREFIX)/include
+	mkdir -p $(PREFIX)/m68k-elf/include && \
+	cp -r include/* $(PREFIX)/m68k-elf/include
 
 romutils:
 	make tools/romutils && cp tools/romutils $(PREFIX)/bin

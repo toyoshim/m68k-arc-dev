@@ -6,7 +6,7 @@ MEMORY
 }
 SECTIONS
 {
-  .text : ALIGN(2) {
+  .text : ALIGN(4) {
     . = 0x000000;
     _vector_start = .;
     KEEP(*(.vectors))
@@ -22,13 +22,15 @@ SECTIONS
     _rodata_end = .;
   } > rom
 
-  .data : ALIGN(2) {
+  _init_data_start = LOADADDR(.data);
+
+  .data : ALIGN(4) {
     _data_start = .;
     KEEP(*(.data))
     _data_end = .;
-  } > ram
+  } > ram AT > rom
 
-  .bss : ALIGN(2) {
+  .bss : ALIGN(4) {
     _bss_start = .;
     KEEP(*(.bss))
     _bss_end = .;
