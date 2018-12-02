@@ -1,12 +1,13 @@
 PREFIX=$(HOME)/opt/m68k-arc-dev
 MAKEFLAG=-j4
 
-.PHONY: all clean m68k-elf-binutils m68k-elf-gcc runtime
+.PHONY: all clean m68k-elf-binutils m68k-elf-gcc runtime romutils
 
 all:
 	make m68k-elf-binutils
 	PATH=$(PATH):$(PREFIX)/bin make m68k-elf-gcc
 	PATH=$(PATH):$(PREFIX)/bin make runtime
+	make romutils
 
 clean:
 	rm -f runtime/*.o a.out
@@ -53,8 +54,12 @@ m68k-elf-gcc:
 	make install
 
 runtime:
-	m68k-elf-gcc -nostdlib -c -o runtime/vectors.o runtime/vectors.S
-	m68k-elf-gcc -nostdlib -c -o runtime/start.o runtime/start.c
+	m68k-elf-gcc -nostdlib -c -o runtime/vectors.o runtime/vectors.S && \
+	m68k-elf-gcc -nostdlib -c -o runtime/start.o runtime/start.c && \
+	mkdir -p $(PREFIX)/lib/runtime && \
+	cp runtime/*.o $(PREFIX)/lib/runtime && \
+	mkdir -p $(PREFIX)/include && \
+	cp -r include/* $(PREFIX)/include
 
-hello:
-	$(PREFIX)/bin/m68k-elf-gcc hello.c runtime/vectors.o runtime/start.o -nostdlib -T ldscript/mahoudai.ld
+romutils:
+	make tools/romutils && cp tools/romutils $(PREFIX)/bin
