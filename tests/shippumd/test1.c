@@ -22,6 +22,10 @@ void show_bits(uint8_t y, uint16_t data) {
 }
 
 void main() {
+  while ((*((uint16_t*)0x21c03c)) & 0x0100);
+  *((uint16_t*)0x300008) = 0x000f;
+  *((uint16_t*)0x30000c) = 0x0000;
+  *((uint16_t*)0x21c009) = 0x0078;
   int i;
   for (i = 0; i < 256; ++i) {
     text_line_select[i] = 0x9000 | i;
@@ -36,6 +40,7 @@ void main() {
     text_palette[i] = palette[i];
 
   for (;;) {
+    while ((*((uint16_t*)0x21c03c)) & 0x0100);
     put_string(4, 16, 0, "Hello, Mahou Daisakusen!");
     put_string(10, 21, 0, "FEDCBA9876543210");
     put_string(5, 22, 0, "P1  :");
