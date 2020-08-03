@@ -10,6 +10,7 @@
 const char kCommandExpand[] = "expand";
 const char kCommandMerge[] = "merge";
 const char kCommandSplit[] = "split";
+const char kCommandSum[] = "sum";
 const char kCommandHelp[] = "help";
 
 void usage(const char* argv0, const char* command) {
@@ -38,6 +39,9 @@ void usage(const char* argv0, const char* command) {
         "other is for odd bytes.\n");
     fprintf(stderr, "If '-2' is specified, splits by word rather than byte.\n");
     exit(EXIT_FAILURE);
+  } else if (!strcmp(kCommandSum, command)) {
+    fprintf(stderr, "%s sum <filename>\n", argv0);
+    fprintf(stderr, "Calculate checksum.\n");
   } else {
     fprintf(stderr, "Usage: %s help <command>\n", argv0);
     fprintf(stderr, "Shows detailed usages for the specified command.\n\n");
@@ -46,6 +50,7 @@ void usage(const char* argv0, const char* command) {
   fprintf(stderr, "  expand    expand binary file size\n");
   fprintf(stderr, "  merge     merge even and odd files into one file\n");
   fprintf(stderr, "  split     split file into files for even and odd bytes\n");
+  fprintf(stderr, "  sum       calculate checksum\n");
   fprintf(stderr, "  help      show detailed usages\n");
   exit(EXIT_FAILURE);
 }
@@ -239,6 +244,33 @@ void split(int argc, char** argv) {
   }
 }
 
+void sum(int argc, char** argv) {
+  if (argc < 3)
+    usage(argv[0], argv[1]);
+
+  int fd = open_to_read(argv[2]);
+  if (fd < 0) {
+    perror(argv[2]);
+    usage(argv[0], argv[1]);
+  }
+  struct stat stat;
+  if (fstat(fd, &stat)) {
+    perror(argv[2]);
+    exit(EXIT_FAILURE);
+  }
+  uint8_t* buf = malloc(stat.st_size);
+  if (stat.st_size != read(fd, buf, stat.st_size)) {
+    perror(argv[2]);
+    exit(EXIT_FAILURE);
+  }
+  uint8_t sum = 0;
+  for (size_t i = 0; i < stat.st_size; ++i)
+    sum += buf[i];
+  free(buf);
+
+  printf("sum: 0x%02x\n", sum);
+}
+
 void help(int argc, char** argv) {
   if (argc < 3)
     usage(argv[0], kCommandHelp);
@@ -254,6 +286,8 @@ int main(int argc, char** argv) {
     merge(argc, argv);
   else if (!strcmp(kCommandSplit, argv[1]))
     split(argc, argv);
+  else if (!strcmp(kCommandSum, argv[1]))
+    sum(argc, argv);
   else if (!strcmp(kCommandHelp, argv[1]))
     help(argc, argv);
   else
